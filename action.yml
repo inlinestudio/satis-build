@@ -16,6 +16,7 @@ runs:
     - env:
         COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ inputs.token }}"}}'
         COMPOSER_HOME: /tmp/.satis-build
+        XDEBUG_MODE: 'off'
       run: |
         mkdir /tmp/.satis-build
         echo "{}" > /tmp/.satis-build/composer.json
