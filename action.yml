@@ -16,12 +16,11 @@ runs:
     - name: 'Set composer home'
       id: composer-home
       run: |
-        echo "folder=$(composer -n config --global home)\n" >> $GITHUB_OUTPUT
+        echo "folder=$(composer -n config --global home)" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: 'Set composer auth'
       run: |
-        mkdir ${{ steps.composer-home.outputs.folder }}
         echo "{}" > ${{ steps.composer-home.outputs.folder }}/composer.json
         composer config --global --auth github-oauth.github.com ${{ github.token }}
       shell: bash
