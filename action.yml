@@ -21,15 +21,15 @@ runs:
 
     - name: 'Set composer auth'
       run: |
-        mkdir {{ steps.composer-home.outputs.home }}
-        echo "{}" > {{ steps.composer-home.outputs.home }}/composer.json
+        mkdir ${{ steps.composer-home.outputs.home }}
+        echo "{}" > ${{ steps.composer-home.outputs.home }}/composer.json
         composer config --global --auth github-oauth.github.com ${{ github.token }}
       shell: bash
 
     - name: 'Set Composer Cache Directory Path Output'
       id: get-composer-cache-dir-path
       run: |
-        cd {{ steps.composer-home.outputs.home }}
+        cd ${{ steps.composer-home.outputs.home }}
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
         echo "$(composer config cache-files-dir)"
       shell: bash
@@ -39,7 +39,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('{{ steps.composer-home.outputs.home }}/composer.lock') }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('${{ steps.composer-home.outputs.home }}/composer.lock') }}
 
     - name: 'Build deps'
       run: |
@@ -49,7 +49,7 @@ runs:
           --no-cache --no-progress --no-interaction -o \
           --ignore-platform-reqs
 
-        php {{ steps.composer-home.outputs.home }}/vendor/bin/satis build satis.json -n
+        php ${{ steps.composer-home.outputs.home }}/vendor/bin/satis build satis.json -n
       shell: bash
 
 branding:
