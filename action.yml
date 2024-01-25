@@ -1,6 +1,16 @@
 name: 'Satis build - composer repository'
 description: 'Build a static composer repository using satis'
 
+inputs:
+  satis_config:
+    description: 'Path to satis configuration file (default: ./satis.json)'
+    required: false
+    default: 'satis.json'
+  composer_home:
+    description: 'Path to composer home'
+    required: false
+    default: '/tmp/.satis-build'
+
 runs:
   using: "composite"
   steps:
@@ -11,19 +21,19 @@ runs:
         tools: composer
       env:
         runner: self-hosted
-        COMPOSER_HOME: /tmp/.satis-build
+        COMPOSER_HOME: '{{ inputs.composer_home }}'
 
     - name: 'Set composer auth'
       run: |
-        mkdir /tmp/.satis-build
-        echo "{}" > /tmp/.satis-build/composer.json
+        mkdir {{ inputs.composer_home }}
+        echo "{}" > {{ inputs.composer_home }}/composer.json
         composer config --global --auth github-oauth.github.com ${{ github.token }}
       shell: bash
 
     - name: 'Set Composer Cache Directory Path Output'
       id: get-composer-cache-dir-path
       run: |
-        cd /tmp/.satis-build
+        cd {{ inputs.composer_home }}
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
         echo "$(composer config cache-files-dir)"
       shell: bash
@@ -33,7 +43,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('/tmp/.satis-build/composer.lock') }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('{{ inputs.composer_home }}/composer.lock') }}
 
     - name: 'Build deps'
       run: |
