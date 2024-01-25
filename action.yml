@@ -1,6 +1,11 @@
 name: 'Satis build - composer repository'
 description: 'Build a static composer repository using satis'
 
+inputs:
+  token:
+    description: 'Token to use (ie. GITHUB_TOKEN, App token or a PAT)'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -22,7 +27,7 @@ runs:
     - name: 'Set composer auth'
       run: |
         echo "{}" > ${{ steps.composer-home.outputs.folder }}/composer.json
-        composer config --global --auth github-oauth.github.com ${{ github.token }}
+        composer config --global --auth github-oauth.github.com ${{ inputs.token }}
       shell: bash
 
     - name: 'Set Composer Cache Directory Path Output'
