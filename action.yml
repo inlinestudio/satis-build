@@ -15,12 +15,12 @@ runs:
     - name: 'Set composer auth'
       run: |
         composer config --global --auth github-oauth.github.com ${{ github.token }}
-        composer config --global --no-plugins allow-plugins.composer/satis true
       shell: bash
 
     - name: 'Set Composer Cache Directory Path Output'
       id: get-composer-cache-dir-path
       run: |
+        cd ${{ github.workspace }}/satis
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
         echo "$(composer config cache-files-dir)"
       shell: bash
@@ -30,7 +30,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('satis/composer.lock') }}
 
     - name: 'Install satis'
       run: |
@@ -39,7 +39,7 @@ runs:
 
     - name: 'Build deps'
       run: |
-        php bin/satis build
+        php bin/satis build ${{ github.workspace }}/satis.json
       shell: bash
 
 branding:
