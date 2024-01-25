@@ -13,26 +13,44 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - env:
-        COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ inputs.token }}"}}'
-        COMPOSER_HOME: /tmp/.satis-build
-        XDEBUG_MODE: 'off'
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        tools: composer
+      env:
+        runner: self-hosted
+
+    - name: 'Set composer auth'
+      run: composer config --global --auth github-oauth.github.com ${{ github.token }}
+      shell: bash
+
+    - name: 'Set Composer Cache Directory Path Output'
+      id: get-composer-cache-dir-path
       run: |
-        mkdir /tmp/.satis-build
-        echo "{}" > /tmp/.satis-build/composer.json
-        
+        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        echo "$(composer config cache-files-dir)"
+      shell: bash
+    
+    - name: 'Cache Composer Cache Directory'
+      id: cache-composer
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+
+    - name: 'Install satis'
+      run: |
         composer global config --no-plugins allow-plugins.composer/satis true
-        
-        composer g require composer/satis:dev-main --prefer-dist \
+        composer global require composer/satis:dev-main --prefer-dist \
           --no-cache --no-progress --no-interaction -o \
           --ignore-platform-reqs
+      shell: bash
 
+    - name: 'Install deps'
+      run: |
+        echo "{}" > composer.json
         php $COMPOSER_HOME/vendor/bin/satis build ${{ inputs.satis_config }} -n
-
-        if cat ${{ inputs.satis_config }} | jq .archive -e; then
-          php $COMPOSER_HOME/vendor/bin/satis purge ${{ inputs.satis_config }} -n
-        fi
-
       shell: bash
     - run: |
         rm -rf $COMPOSER_HOME
