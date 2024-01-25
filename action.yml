@@ -1,15 +1,6 @@
 name: 'Satis build - composer repository'
 description: 'Build a static composer repository using satis'
 
-inputs:
-  token:
-    description: 'Token to use (ie. GITHUB_TOKEN, App token or a PAT)'
-    required: false
-  satis_config:
-    description: 'Path to satis configuration file (default: ./satis.json)'
-    required: false
-    default: 'satis.json'
-
 runs:
   using: "composite"
   steps:
@@ -22,7 +13,9 @@ runs:
         runner: self-hosted
 
     - name: 'Set composer auth'
-      run: composer config --global --auth github-oauth.github.com ${{ github.token }}
+      run: |
+        composer config --global --auth github-oauth.github.com ${{ github.token }}
+        composer config --global --no-plugins allow-plugins.composer/satis true
       shell: bash
 
     - name: 'Set Composer Cache Directory Path Output'
@@ -41,19 +34,12 @@ runs:
 
     - name: 'Install satis'
       run: |
-        composer global config --no-plugins allow-plugins.composer/satis true
-        composer global require composer/satis:dev-main --prefer-dist \
-          --no-cache --no-progress --no-interaction -o \
-          --ignore-platform-reqs
+        composer create-project composer/satis:dev-main
       shell: bash
 
-    - name: 'Install deps'
+    - name: 'Build deps'
       run: |
-        echo "{}" > composer.json
-        php $COMPOSER_HOME/vendor/bin/satis build ${{ inputs.satis_config }} -n
-      shell: bash
-    - run: |
-        rm -rf $COMPOSER_HOME
+        php bin/satis build
       shell: bash
 
 branding:
