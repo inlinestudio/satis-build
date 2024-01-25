@@ -4,7 +4,7 @@ description: 'Build a static composer repository using satis'
 inputs:
   token:
     description: 'Token to use (ie. GITHUB_TOKEN, App token or a PAT)'
-    required: true
+    required: false
   satis_config:
     description: 'Path to satis configuration file (default: ./satis.json)'
     required: false
