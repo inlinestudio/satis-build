@@ -11,6 +11,7 @@ runs:
         tools: composer
       env:
         runner: self-hosted
+        COMPOSER_HOME: /tmp/.satis-build
 
     - name: 'Set composer auth'
       run: |
@@ -30,16 +31,20 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('satis/composer.lock') }}
-
-    - name: 'Install satis'
-      run: |
-        composer create-project composer/satis:dev-main
-      shell: bash
+        key: ${{ runner.os }}-composer-${{ hashFiles('/tmp/.satis-build/composer.lock') }}
 
     - name: 'Build deps'
       run: |
-        php bin/satis build ${{ github.workspace }}/satis.json
+        mkdir /tmp/.satis-build
+        echo "{}" > /tmp/.satis-build/composer.json
+    
+        composer global config --no-plugins allow-plugins.composer/satis true
+
+        composer g require composer/satis:dev-main --prefer-dist \
+          --no-cache --no-progress --no-interaction -o \
+          --ignore-platform-reqs
+
+        php $COMPOSER_HOME/vendor/bin/satis build satis.json -n
       shell: bash
 
 branding:
