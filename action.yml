@@ -40,7 +40,7 @@ runs:
     
     - name: 'Cache Composer Cache Directory'
       id: cache-composer
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-composer-${{ hashFiles('${{ steps.composer-home.outputs.folder }}/composer.lock') }}
