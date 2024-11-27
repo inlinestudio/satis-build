@@ -25,25 +25,8 @@ runs:
       shell: bash
 
     - name: 'Set composer auth'
-      run: |
-        echo "{}" > ${{ steps.composer-home.outputs.folder }}/composer.json
-        composer config --global --auth github-oauth.github.com ${{ inputs.token }}
+      run: composer config --global --auth github-oauth.github.com ${{ inputs.token }}
       shell: bash
-
-    - name: 'Set Composer Cache Directory Path Output'
-      id: get-composer-cache-dir-path
-      run: |
-        cd ${{ steps.composer-home.outputs.folder }}
-        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        echo "$(composer config cache-files-dir)"
-      shell: bash
-    
-    - name: 'Cache Composer Cache Directory'
-      id: cache-composer
-      uses: actions/cache@v4
-      with:
-        path: ${{ steps.get-composer-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('${{ steps.composer-home.outputs.folder }}/composer.lock') }}
 
     - name: 'Build deps'
       run: |
