@@ -20,8 +20,7 @@ runs:
 
     - name: 'Set composer home'
       id: composer-home
-      run: |
-        echo "folder=$(composer -n config --global home)" >> $GITHUB_OUTPUT
+      run: echo "folder=$(composer -n config --global home)" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: 'Set composer auth'
@@ -34,9 +33,11 @@ runs:
 
         composer g require composer/satis:dev-main --prefer-dist \
           --no-cache --no-progress --no-interaction -o \
-          --ignore-platform-reqs
-
-        php ${{ steps.composer-home.outputs.folder }}/vendor/bin/satis build satis.json -n
+          --ignore-platform-reqs        
+      shell: bash
+    
+    - name: 'Split'
+      run: php ${{ steps.composer-home.outputs.folder }}/vendor/bin/satis build satis.json -n
       shell: bash
 
 branding:
